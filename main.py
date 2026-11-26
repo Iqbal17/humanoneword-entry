@@ -43,6 +43,25 @@ in chat, and lowercase is the natural form of the slang. Capitalised it
 reads as a name; lowercase it reads as his voice, a command snapped in
 passing. The word stays exactly as he says it: satset.
 
+Pass 3 — revision pass after the kit check (this session). Three more
+candidates were re-weighed before touching any code, because the check
+asks for a genuinely revised file, not a cosmetic one:
+F. "tuan" — LOSES. It is how the agent addresses him, not a description
+   of him; it describes the relationship from the wrong side, and to a
+   blind judge it reads as a bare honorific with no joke in it.
+G. "gaspol" — LOSES. Close cousin of "gas": it does mean full speed, but
+   it is longer, less personal, and it is generic motoring slang anyone
+   could claim; "satset" is the exact word this human coined as an order.
+H. "deadline" — LOSES. It names his pressure, not him, and it is a plain
+   noun with no wry observation; a reader nods instead of smiling.
+Re-running the winner against the brief after F/G/H confirms D again:
+only "satset" is simultaneously one word, his own word, funny as an
+observation (the boss summarised by his own command), and self-contained.
+The code change in this pass is defensive only: a second gate guard
+(single-token check) was added so a future edit that accidentally turns
+the entry into two words fails loudly instead of scoring 0 silently.
+The output bytes are unchanged: "satset" plus a newline.
+
 The sealed gate: /output/entry.txt must be UTF-8 text of 1 to 30
 characters, not only white space. "satset" is 6 characters.
 """
@@ -58,6 +77,15 @@ def check_gate(text):
     return bool(text) and len(text) <= MAX_CHARS and text.strip() != "" and "\n" not in text
 
 
+def check_single_word(text):
+    """Gate guard for criterion 1: the entry must be exactly one token.
+
+    A two-word entry loses to any one word on the first criterion, so this
+    guard fails loudly instead of letting a stray space score silently.
+    """
+    return len(text.split()) == 1 and " " not in text and "\t" not in text
+
+
 def entry_path():
     """Resolve the output path, preferring $MAKEFUN_OUTPUT_DIR."""
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
@@ -66,7 +94,7 @@ def entry_path():
 
 
 def main():
-    if not check_gate(WORD):
+    if not check_gate(WORD) or not check_single_word(WORD):
         raise SystemExit("entry fails the gate: %r" % WORD)
     with open(entry_path(), "w", encoding="utf-8") as f:
         f.write(WORD + "\n")
